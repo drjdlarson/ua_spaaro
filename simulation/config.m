@@ -16,7 +16,7 @@ Target.alt_msl_m = 100;
 Target.heading_deg = 90;  % +/-180 degrees relative to true north
 Target.airspeed_mps = 17;
 % Ground height above mean sea level [m]
-Env.terrain_alt_wgs84 = 0;
+Env.terrain_alt_wgs84 = 67.117600;
 Env.wmm_nt = [22938.3 -33.7 -132.6];
 
 %% Initial Condition for simulation
@@ -24,19 +24,19 @@ InitCond.ned_pos_m = [0 0 -5];
 InitCond.body_vel_mps = [1 0 0];
 InitCond.euler_rad = [0 0 0];
 InitCond.body_rot_rate_radps = [0 0 0];
-InitCond.lat_rad = 0.579621767644;
-InitCond.lon_rad = -1.527761279167;
+InitCond.lat_rad = 33.209955 * pi / 180; % 0.579621767644;
+InitCond.lon_rad = -87.534240 * pi / 180; % -1.527761279167;
 
 %% Flight software frame rate
-frameRate_hz = 50;
+frameRate_hz = 100;
 framePeriod_s = 1/frameRate_hz;
 
 %% Definitions
 % Vehicle
-% vehicle = 'super';
-vehicle = 'queso';
+vehicle = 'super';
+% vehicle = 'queso';
 
 % FMU-R version
-fmu_version = "v1";
+% fmu_version = "v1";
 % fmu_version = "v2-beta";
-% fmu_version = "v2";
+fmu_version = "v2";
