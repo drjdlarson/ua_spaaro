@@ -248,11 +248,12 @@ Aircraft.Control.P_alt = 1;
 Aircraft.Control.P_xy = 3;
 Aircraft.Control.I_xy = 0.1;
 Aircraft.Control.wp_radius = 1.5;
-Aircraft.Control.wp_nav_speed = 3;
+Aircraft.Control.wp_nav_speed = 5;
 
 %% Heading controller parameters
-Aircraft.Control.P_heading = 1;
+Aircraft.Control.P_heading = 5;
 Aircraft.Control.I_heading = 0.01;
+Aircraft.Control.D_heading = 1.5;
 
 %% Return to land parameters
 Aircraft.Control.rtl_altitude = 100;
