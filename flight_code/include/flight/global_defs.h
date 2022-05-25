@@ -38,6 +38,8 @@
 #include "sbus/sbus.h"
 #include "pwm/pwm.h"
 #include "units/units.h"
+#include "core/core.h"
+
 
 /* Control sizes */
 inline constexpr std::size_t NUM_AUX_VAR = 24;
@@ -53,6 +55,14 @@ inline constexpr std::size_t NUM_FLIGHT_PLAN_POINTS = 100;
 inline constexpr std::size_t NUM_FENCE_POINTS = 50;
 inline constexpr std::size_t NUM_RALLY_POINTS = 10;
 #endif
+
+
+/*Lidar config*/
+struct LidarConfig{
+	int32_t baud;
+	HardwareSerial *bus;
+};
+
 /* Sensor config */
 struct SensorConfig {
   bool pitot_static_installed;
@@ -60,6 +70,7 @@ struct SensorConfig {
   bfs::GnssConfig gnss;
   bfs::PresConfig static_pres;
   bfs::PresConfig diff_pres;
+  LidarConfig lidar;
 };
 /* Nav config */
 struct NavConfig {
@@ -75,6 +86,8 @@ struct TelemConfig {
   HardwareSerial *bus;
   int32_t baud;
 };
+
+
 /* Aircraft config */
 struct AircraftConfig {
   SensorConfig sensor;
@@ -112,6 +125,15 @@ struct InceptorData {
   bool ch18;
   std::array<int16_t, bfs::SbusRx::NUM_CH> ch;
 };
+
+/*Lidar Data*/
+struct LidarData{
+	float front_mm;
+	float right_mm;
+	float back_mm;
+	float left_mm;
+};
+
 /* Sensor data */
 struct SensorData {
   bool pitot_static_installed;
@@ -124,6 +146,8 @@ struct SensorData {
   #if defined(__FMU_R_V2__)
   PowerModuleData power_module;
   #endif
+ 	LidarData lidar;
+  
 };
 /* Nav data */
 struct NavData {
@@ -208,6 +232,7 @@ struct TelemData {
   std::array<bfs::MissionItem, NUM_FENCE_POINTS> fence;
   std::array<bfs::MissionItem, NUM_RALLY_POINTS> rally;
 };
+
 /* Aircraft data */
 struct AircraftData {
   SysData sys;

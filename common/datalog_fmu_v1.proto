@@ -141,4 +141,11 @@ message DatalogMessage {
   sint32 waypoint_y = 207;
   float waypoint_z = 208;
   repeated float telem_param = 209;
+
+
+  /*Lidar Data*/
+  float front_mm=215;
+  float right_mm=216;
+  float back_mm=217;
+  float left_mm=218;
 }

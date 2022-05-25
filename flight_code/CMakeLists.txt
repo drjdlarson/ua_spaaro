@@ -88,12 +88,15 @@ FetchContent_Declare(
 	GIT_TAG v2.0.0
 )
 FetchContent_MakeAvailable(checksum)
+
 FetchContent_Declare(
 	imu
 	GIT_REPOSITORY https://github.com/bolderflight/imu.git
 	GIT_TAG v2.2.0
 )
 FetchContent_MakeAvailable(imu)
+
+
 FetchContent_Declare(
 	gnss
 	GIT_REPOSITORY https://github.com/bolderflight/gnss.git

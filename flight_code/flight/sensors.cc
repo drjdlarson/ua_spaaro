@@ -42,6 +42,8 @@ bfs::Ublox gnss;
 bfs::Bme280 fmu_static_pres;
 bfs::Ams5915 pitot_static_pres;
 bfs::Ams5915 pitot_diff_pres;
+HardwareSerial lidar;
+
 }  // namespace
 
 void SensorsInit(const SensorConfig &cfg) {
@@ -68,6 +70,14 @@ void SensorsInit(const SensorConfig &cfg) {
       MsgError("Unable to initialize static pressure sensor.");
     }
   }
+  
+  /* Initialize the Lidar */
+  lidar.begin(config.sensor.lidar.baud);
+  
+  if(!lidar.available()){
+  	MsgError("Unable to initialize LIDAR");
+  }
+  
   MsgInfo("done.\n");
   /* Initialize inceptors */
   MsgInfo("Initializing inceptors...");
@@ -76,6 +86,7 @@ void SensorsInit(const SensorConfig &cfg) {
 }
 void SensorsRead(SensorData * const data) {
   if (!data) {return;}
+  
   /* Read inceptors */
   data->inceptor.new_data = inceptor.Read();
   if (data->inceptor.new_data) {
@@ -85,6 +96,7 @@ void SensorsRead(SensorData * const data) {
     data->inceptor.lost_frame = inceptor.lost_frame();
     data->inceptor.failsafe = inceptor.failsafe();
   }
+  
   /* Read IMU */
   if (!imu.Read(&data->imu)) {
     MsgWarning("Unable to read IMU data.\n");
@@ -92,8 +104,12 @@ void SensorsRead(SensorData * const data) {
   /* Read GNSS */
   gnss.Read(&data->gnss);
   /* Set whether pitot static is installed */
+  
   data->pitot_static_installed = pitot_static_installed_;
   /* Read pressure transducers */
+  
+  &data->lidar=lidar.read();
+  
   if (pitot_static_installed_) {
     if (!pitot_static_pres.Read(&data->static_pres)) {
       MsgError("Unable to read pitot static pressure data.\n");

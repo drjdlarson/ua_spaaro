@@ -119,6 +119,13 @@ void DatalogAdd(const AircraftData &ref) {
   }
   datalog_msg_.gnss_lat_rad = ref.sensor.gnss.lat_rad;
   datalog_msg_.gnss_lon_rad = ref.sensor.gnss.lon_rad;
+  
+  /*Lidar data*/
+  datalog_msg_.front_mm=ref.sensor.lidar.front_mm;
+  datalog_msg_.right_mm=ref.sensor.lidar.right_mm;
+  datalog_msg_.back_mm=ref.sensor.lidar.back_mm;
+  datalog_msg_.left_mm=ref.sensor.lidar.left_mm;
+  
   /* Pressure data */
   datalog_msg_.pitot_static_installed = ref.sensor.pitot_static_installed;
   datalog_msg_.pres_static_new_data = ref.sensor.static_pres.new_data;

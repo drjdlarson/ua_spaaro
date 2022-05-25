@@ -59,6 +59,10 @@ AircraftConfig config = {
       .transducer = bfs::AMS5915_0010_D,
       .sampling_period_ms = FRAME_PERIOD_MS,
       .bus = &PRES_I2C_BUS
+    },
+    .lidar={
+    	.baud=921600,
+    	.bus=&Serial2,
     }
   },
   .nav = {
