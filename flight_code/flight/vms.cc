@@ -2,7 +2,7 @@
 * Brian R Taylor
 * brian.taylor@bolderflight.com
 * 
-* Copyright (c) 2021 Bolder Flight Systems Inc
+* Copyright (c) 2022 Bolder Flight Systems Inc
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the “Software”), to
@@ -27,8 +27,10 @@
 #ifdef __AUTOCODE__
   #include "./autocode.h"
 #else
-  #include "control/control.h"
-  #include "excitation/excitation.h"
+  #include "control.h"  // NOLINT
+  #include "excitation.h"  // NOLINT
+  #include "filter.h"  // NOLINT
+  #include "polytools.h"  // NOLINT
 #endif
 
 namespace {
@@ -50,4 +52,6 @@ void VmsRun(const SysData &sys, const SensorData &sensor,
 #ifdef __AUTOCODE__
   autocode.Run(sys, sensor, nav, telem, vms);
 #endif
+  vms->drone_can_act.cnt[0] = sensor.sbus_inceptor.ch[0] * 0.0012202562538133f
+                              - 1.20988407565589f;
 }

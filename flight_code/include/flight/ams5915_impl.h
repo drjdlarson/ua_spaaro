@@ -23,34 +23,14 @@
 * IN THE SOFTWARE.
 */
 
-#include "flight/msg.h"
-#include "flight/hardware_defs.h"
-#include "flight/config.h"
-#include "./version.h"
+#ifndef FLIGHT_CODE_INCLUDE_FLIGHT_AMS5915_IMPL_H_
+#define FLIGHT_CODE_INCLUDE_FLIGHT_AMS5915_IMPL_H_
 
-void MsgBegin() {
-  MSG_BUS.begin(115200);
-  if (DEBUG) {
-    while (!MSG_BUS) {}
-  }
-  MSG_BUS.println("---------Bolder Flight Systems---------");
-  MSG_BUS.println("Flight Software");
-  MSG_BUS.print("Version: ");
-  MSG_BUS.println(PROJECT_VERSION);
-  MSG_BUS.println("---------------------------------------");
-}
+#include "flight/global_defs.h"
 
-void MsgInfo(const char * str) {
-  MSG_BUS.print(str);
-}
+void Ams5915Init(const Ams5915Config &static_pres,
+                 const Ams5915Config &diff_pres);
+void Ams5915Read();
+void Ams5915PresData(PresData * const static_pres, PresData * const diff_pres);
 
-void MsgWarning(const char * str) {
-  MSG_BUS.print("\nWARNING: ");
-  MSG_BUS.print(str);
-}
-
-void MsgError(const char * str) {
-  MSG_BUS.print("\nERROR: ");
-  MSG_BUS.print(str);
-  while (1) {}
-}
+#endif  // FLIGHT_CODE_INCLUDE_FLIGHT_AMS5915_IMPL_H_

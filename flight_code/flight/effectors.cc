@@ -2,7 +2,7 @@
 * Brian R Taylor
 * brian.taylor@bolderflight.com
 * 
-* Copyright (c) 2021 Bolder Flight Systems Inc
+* Copyright (c) 2022 Bolder Flight Systems Inc
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the “Software”), to
@@ -27,28 +27,32 @@
 #include "flight/global_defs.h"
 #include "flight/config.h"
 #include "flight/msg.h"
+#include "sbus.h"  // NOLINT
+#include "pwm.h"  // NOLINT
 
 namespace {
 /* Effectors */
-bfs::SbusTx sbus;
-bfs::PwmTx<NUM_PWM_PINS> pwm;
+SbusTx sbus(&SBUS_UART);
+PwmTx<NUM_PWM_PINS> pwm(PWM_PINS);
 }  // namespace
 
 void EffectorsInit() {
   MsgInfo("Intializing effectors...");
   /* Init SBUS */
-  sbus.Init(&SBUS_UART);
+  sbus.Begin();
   /* Init PWM */
-  pwm.Init(PWM_PINS);
+  pwm.Begin();
   MsgInfo("done.\n");
 }
-void EffectorsCmd(const VmsData &vms) {
+
+void EffectorsCmd(const SbusCmd &s, const PwmCmd &p) {
   /* Set effector commands */
-  sbus.ch(vms.sbus.cnt);
-  sbus.ch17(vms.sbus.ch17);
-  sbus.ch18(vms.sbus.ch18);
-  pwm.ch(vms.pwm.cnt);
+  sbus.ch(s.cnt);
+  sbus.ch17(s.ch17);
+  sbus.ch18(s.ch18);
+  pwm.ch(p.cnt);
 }
+
 void EffectorsWrite() {
   /* Write the effector commands */
   sbus.Write();

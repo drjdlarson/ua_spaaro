@@ -2,7 +2,7 @@
 * Brian R Taylor
 * brian.taylor@bolderflight.com
 * 
-* Copyright (c) 2021 Bolder Flight Systems Inc
+* Copyright (c) 2022 Bolder Flight Systems Inc
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the “Software”), to
@@ -23,23 +23,24 @@
 * IN THE SOFTWARE.
 */
 
-#include "flight/hardware_defs.h"
+#include "flight/msg.h"
 #include "flight/global_defs.h"
 #include "flight/config.h"
-#include "flight/msg.h"
-#include "flight/sys.h"
 #include "flight/sensors.h"
 #include "flight/effectors.h"
-#include "flight/nav.h"
+#include "flight/sys.h"
 #include "flight/vms.h"
 #include "flight/datalog.h"
 #include "flight/telem.h"
+#include "flight/airdata_est.h"
+#include "flight/vector_nav_impl.h"
+#include "flight/bfs_ekf.h"
+#include "flight/dronecan.h"
 
 /* Aircraft data */
 AircraftData data;
 /* Timer for sending effector commands */
 IntervalTimer effector_timer;
-
 /* ISR to send effector commands */
 void send_effectors() {
   /* Stop the effector timer */
@@ -51,8 +52,10 @@ void send_effectors() {
   #endif
   /* Send effector commands */
   EffectorsWrite();
+  #if defined(__FMU_R_V2__) ||  defined(__FMU_R_V2_BETA__)
+  DroneCanActuatorSend();
+  #endif
 }
-
 /* ISR to gather sensor data and run VMS */
 void run() {
   /* Start the effector timer */
@@ -65,13 +68,18 @@ void run() {
   /* System data */
   SysRead(&data.sys);
   /* Sensor data */
-  SensorsRead(&data.sensor);
+  ReadSensors(&data.sensor);
   /* Nav filter */
-  NavRun(data.sensor, &data.nav);
+  AirDataEst(data.sensor, &data.nav.airdata);
+  BfsNavRun(data.sensor, &data.nav.bfs_ekf);
+  VectorNavInsData(&data.nav.vector_nav);
   /* VMS */
   VmsRun(data.sys, data.sensor, data.nav, data.telem, &data.vms);
   /* Command effectors */
-  EffectorsCmd(data.vms);
+  EffectorsCmd(data.vms.sbus, data.vms.pwm);
+  #if defined(__FMU_R_V2__) ||  defined(__FMU_R_V2_BETA__)
+  DroneCanActuatorWrite(data.vms.drone_can_act, data.vms.drone_can_esc);
+  #endif
   /* Datalog */
   DatalogAdd(data);
   /* Telemetry */
@@ -85,10 +93,15 @@ int main() {
   MsgBegin();
   /* Init system */
   SysInit();
+  /* Init DroneCAN */
+  #if defined(__FMU_R_V2__) ||  defined(__FMU_R_V2_BETA__)
+  DroneCanInit(config.drone_can);
+  #endif
   /* Init sensors */
-  SensorsInit(config.sensor);
-  /* Init nav */
-  NavInit(config.nav);
+  InitSensors(config.sensor);
+  /* Init nav filter */
+  AirDataInit(config.airdata);
+  BfsNavInit(config.bfs_ekf);
   /* Init effectors */
   EffectorsInit();
   /* Init VMS */
@@ -98,7 +111,11 @@ int main() {
   /* Init datalog */
   DatalogInit();
   /* Attach data ready interrupt */
-  attachInterrupt(IMU_DRDY, run, RISING);
+  if (config.sensor.drdy_source == DRDY_MPU9250) {
+    attachInterrupt(MPU9250_DRDY, run, RISING);
+  } else {
+    attachInterrupt(VN_DRDY, run, RISING);
+  }
   while (1) {
     /* Flush datalog */
     DatalogFlush();

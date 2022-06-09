@@ -2,7 +2,7 @@
 * Brian R Taylor
 * brian.taylor@bolderflight.com
 * 
-* Copyright (c) 2021 Bolder Flight Systems Inc
+* Copyright (c) 2022 Bolder Flight Systems Inc
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the “Software”), to
@@ -24,7 +24,6 @@
 */
 
 #include "flight/config.h"
-#include "flight/hardware_defs.h"
 #include "flight/global_defs.h"
 
 /* Debug */
@@ -32,45 +31,84 @@ bool DEBUG = true;
 /* Aircraft config */
 AircraftConfig config = {
   .sensor = {
-    .pitot_static_installed = true,
-    .imu = {
-      .dev = IMU_CS,
-      .frame_rate = FRAME_RATE_HZ,
-      .bus = &IMU_SPI_BUS,
-      .accel_bias_mps2 = {0, 0, 0},
-      .mag_bias_ut = {0, 0, 0},
-      .accel_scale = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}},
-      .mag_scale = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}},
-      .rotation = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}}
+    .drdy_source = DRDY_MPU9250,
+    .sbus = {
+      .installed = true
     },
-    .gnss = {
-      .sampling_period_ms = 100,  // 10 Hz
-      .baud = 921600,
-      .bus = &Serial3
+    .mpu9250 = {
+      .accel_range_g = Mpu9250::ACCEL_RANGE_16G,
+      .gyro_range_dps = Mpu9250::GYRO_RANGE_2000DPS,
+      .dlpf_hz = Mpu9250::DLPF_BANDWIDTH_20HZ,
+      .accel_bias_mps2 = Vector3f::Zero(),
+      .mag_bias_ut = Vector3f::Zero(),
+      .accel_scale = Matrix3f::Identity(),
+      .mag_scale = Matrix3f::Identity(),
+      .rotation = Matrix3f::Identity()
     },
-    .static_pres = {
-      .dev = 0x10,
-      .transducer = bfs::AMS5915_1200_B,
-      .sampling_period_ms = FRAME_PERIOD_MS,
-      .bus = &PRES_I2C_BUS
+    // .vector_nav = {
+    //   .device = VECTORNAV_VN300,
+    //   .accel_filt_window = 4,
+    //   .gyro_filt_window = 4,
+    //   .mag_filt_window = 0,
+    //   .temp_filt_window = 4,
+    //   .pres_filt_window = 0,
+    //   .antenna_offset_m = Vector3f::Zero(),
+    //   .antenna_baseline_m = Vector3f::Zero(),
+    //   .baseline_uncertainty_m = Vector3f::Zero(),
+    //   .rotation = Matrix3f::Identity()
+    // },
+    // .ams5915_static_pres = {
+    //   .addr = 0x10,
+    //   .transducer = AMS5915_1200_B
+    // },
+    // .ams5915_diff_pres = {
+    //   .addr = 0x11,
+    //   .transducer = AMS5915_0020_D
+    // },
+    .ms4525do = {
+      .addr = 0x28,
+      .min_pres = -1,
+      .max_pres = 1
     },
-    .diff_pres = {
-      .dev = 0x11,
-      .transducer = bfs::AMS5915_0010_D,
-      .sampling_period_ms = FRAME_PERIOD_MS,
-      .bus = &PRES_I2C_BUS
+    .gnss_uart3 = {
+      .baud = 921600
+    },
+    // .gnss_uart4 = {
+    //   .baud = 921600
+    // }
+  },
+  .airdata = {
+    .static_pres_source = AIR_DATA_STATIC_PRES_BME280,
+    .diff_pres_source = AIR_DATA_DIFF_PRES_MS4525DO,
+    .static_pres_cutoff_hz = 5,
+    .diff_pres_cutoff_hz = 5
+  },
+  .bfs_ekf = {
+    .imu_source = EKF_IMU_MPU9250,
+    .gnss_source_prim = EKF_GNSS_UBLOX3,
+    .accel_cutoff_hz = 10,
+    .gyro_cutoff_hz = 10,
+    .mag_cutoff_hz = 10
+  },
+  .drone_can = {
+    .baud = 1000000,
+    .num_actuators = 1,
+    .config = {
+      {
+        .actuator_id = 3,
+        .command_type = 0
+      }
     }
   },
-  .nav = {
-    .accel_cutoff_hz = 20,
-    .gyro_cutoff_hz = 20,
-    .mag_cutoff_hz = 10,
-    .static_pres_cutoff_hz = 10,
-    .diff_pres_cutoff_hz = 10
-  },
   .telem = {
-    .aircraft_type = bfs::FIXED_WING,
+    .aircraft_type = FIXED_WING,
+    .imu_source = TELEM_IMU_MPU9250,
+    .static_pres_source = TELEM_STATIC_PRES_BME280,
+    .diff_pres_source = TELEM_DIFF_PRES_MS4525DO,
+    .gnss_source = TELEM_GNSS_UBLOX3,
+    .nav_source = TELEM_NAV_BFS_EKF,
     .bus = &Serial4,
+    .rtk_uart = &Serial3,
     .baud = 57600
   }
 };
